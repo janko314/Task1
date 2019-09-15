@@ -144,6 +144,7 @@
       <DependentUpon>201909131913333_Migracija.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Models\PregledStavkiRacuna.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -187,10 +188,11 @@
     <Content Include="Views\Racun\Index.cshtml" />
     <Content Include="Views\StavkaRacuna\Create.cshtml" />
     <Content Include="Views\StavkaRacuna\Index.cshtml" />
+    <Content Include="Views\StavkaRacuna\Edit.cshtml" />
+    <Content Include="Views\Racun\Edit.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Models\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff2" />

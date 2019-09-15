@@ -39,9 +39,7 @@ namespace Task1.Controllers
         // GET: Racun/Details/5
         public ActionResult Details(int id)
         {
-            //var racun = _db.Racuni.Where(x => x.ID == id).FirstOrDefault();
-            var stavke = _db.StavkeRacuna.Where(x => x.RacunId == id).ToList();
-            return View(stavke);
+            return RedirectToAction("Index", "StavkaRacuna", new { racunId = id });
         }
 
         // GET: Racun/Create
@@ -75,14 +73,12 @@ namespace Task1.Controllers
 
         // GET: Racun/Edit/5
         [HttpGet]
-        public ActionResult Edit(int? id)
+        public ActionResult Edit(int? Id)
         {
-            if (id != null)
+            if (Id != null)
             {
-                //var racun = _db.Racuni.Find(id);
-                //var stavke = _db.StavkeRacuna.Where(x => x.Racuni.ID == id).ToList();
-                //return View("Index", "StavkaRacuna", stavke);
-                return RedirectToAction("Index", "StavkaRacuna", new { racunId = id });
+                var racun = _db.Racuni.Find(Id);
+                return View(racun);
             }
             else
             {

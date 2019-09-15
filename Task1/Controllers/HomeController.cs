@@ -8,19 +8,19 @@ namespace Task1.Controllers
     {
         DataDb _db = new DataDb();
 
-        public ActionResult Index(string searchTerm = null)
-        {
-            var model = _db.Racuni.OrderBy(x => x.BrojRacuna)
-                .Where(x => searchTerm == null || x.BrojRacuna.StartsWith(searchTerm))
-                .Take(10)
-                .Select(x => new Data.Racun
-                {
-                    ID = x.ID,
-                    BrojRacuna = x.BrojRacuna,
-                    Ukupno = x.Ukupno
-                });
-            return View(model);
-        }
+        //public ActionResult Index(string searchTerm = null)
+        //{
+        //    var model = _db.Racuni.OrderBy(x => x.BrojRacuna)
+        //        //.Where(x => searchTerm == null || x.BrojRacuna.StartsWith(searchTerm))
+        //        //.Take(10)
+        //        //.Select(x => new Data.Racun
+        //        //{
+        //        //    ID = x.ID,
+        //        //    BrojRacuna = x.BrojRacuna,
+        //        //    Ukupno = x.Ukupno
+        //        //});
+        //    return View(model);
+        //}
 
         public ActionResult Index()
         {
