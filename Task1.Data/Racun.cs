@@ -16,7 +16,9 @@ namespace Task1.Data
 
         [Required]
         public virtual DateTime Datum { get; set; }
+
         [Required]
+        [DisplayFormat(DataFormatString = "{0:#,##0.##}", ApplyFormatInEditMode = true)]
         public virtual Decimal Ukupno { get; set; }
 
         public virtual ICollection<StavkaRacuna> Stavke { get; set; }

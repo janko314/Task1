@@ -12,17 +12,18 @@ namespace Task1.Controllers
     {
         DataDb _db = new DataDb();
 
-        // GET: StavkaRacuna
+        //[OutputCache(CacheProfile = "Long", VaryByHeader = "X-Request-With", Location = System.Web.UI.OutputCacheLocation.Server)]
         public ActionResult Index(int? racunId)
         {
             if (racunId == null)
                 return RedirectToAction("Index", "Racun");
 
             Session["racunId"] = racunId;
-            var stavke = _db.StavkeRacuna.Where(x => x.RacunId == racunId).ToList();
 
-            List<PregledStavkiRacunaView> model =
-                _db.StavkeRacuna.Join(_db.Proizvodi,
+            List<PregledStavkiRacuna> model =
+                _db.StavkeRacuna
+                .Where(x => x.RacunId == racunId)
+                .Join(_db.Proizvodi,
                                       stavka => stavka.ProizvodId,
                                       proizvod => proizvod.ID,
                                       (stavka, proizvod) => new PregledStavkiRacuna()
@@ -33,24 +34,10 @@ namespace Task1.Controllers
                                           Cena = proizvod.Cena,
                                           Ukupno = (stavka.Kolicina * proizvod.Cena)
                                       })
-                .ToList()
-                .Select(x => new PregledStavkiRacunaView()
-                {
-                    ID = x.ID,
-                    Kolicina = x.Kolicina.ToString("#,###"),
-                    Proizvod = x.Proizvod,
-                    Cena = x.Cena.ToString("#,###.00"),
-                    Ukupno = (x.Kolicina * x.Cena).ToString("#,###.00")
-                })
                 .ToList();
 
             ViewBag.Racun = _db.Racuni.Find(racunId).BrojRacuna;
             return View(model);
-        }
-
-        public ActionResult Details(int id)
-        {
-            return View();
         }
 
         public ActionResult Create()
@@ -70,7 +57,13 @@ namespace Task1.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    _db.StavkeRacuna.Add(stavka);
+                    stavka.ListaProizvoda = PripremiListuProizvoda();                    
+                    if(_db.StavkeRacuna.Where(x => x.ProizvodId == stavka.ProizvodId).FirstOrDefault() == null)
+                        _db.StavkeRacuna.Add(stavka);
+                    else
+                        _db.StavkeRacuna.Where(x => x.ProizvodId == stavka.ProizvodId).FirstOrDefault().Kolicina += stavka.Kolicina;
+                    _db.SaveChanges();
+                    _db.Racuni.Find(stavka.RacunId).Ukupno = VrednostRacuna(stavka.RacunId);
                     _db.SaveChanges();
                 }
 
@@ -82,7 +75,6 @@ namespace Task1.Controllers
             }
         }
 
-        // GET: StavkaRacuna/Edit/5
         public ActionResult Edit(int? Id)
         {
             if (Id != null)
@@ -98,19 +90,20 @@ namespace Task1.Controllers
             }
         }
 
-        // POST: StavkaRacuna/Edit/5
         [HttpPost]
         public ActionResult Edit(StavkaRacuna stavka)
         {
             try
             {
                 if (ModelState.IsValid)
-                {
+                {                    
                     _db.Entry(stavka).State = System.Data.Entity.EntityState.Modified;
+                    _db.SaveChanges();
+                    _db.Racuni.Find(stavka.RacunId).Ukupno = VrednostRacuna(stavka.RacunId);
                     _db.SaveChanges();
                 }
 
-                return RedirectToAction("Index");
+                return RedirectToAction("Index", "StavkaRacuna", new { racunId = stavka.RacunId });
             }
             catch
             {
@@ -118,26 +111,15 @@ namespace Task1.Controllers
             }
         }
 
-        // GET: StavkaRacuna/Delete/5
         public ActionResult Delete(int id)
         {
-            return View();
-        }
-
-        // POST: StavkaRacuna/Delete/5
-        [HttpPost]
-        public ActionResult Delete(int id, FormCollection collection)
-        {
-            try
-            {
-                // TODO: Add delete logic here
-
-                return RedirectToAction("Index");
-            }
-            catch
-            {
-                return View();
-            }
+            int rId = (int)Session["racunId"];
+            var stavka = _db.StavkeRacuna.Find(id);
+            _db.StavkeRacuna.Remove(stavka);
+            _db.SaveChanges();
+            _db.Racuni.Find(stavka.RacunId).Ukupno = VrednostRacuna(rId);
+            _db.SaveChanges();
+            return RedirectToAction("Index", "StavkaRacuna", new { racunId = rId });
         }
 
         private List<SelectListItem> PripremiListuProizvoda()
@@ -156,5 +138,25 @@ namespace Task1.Controllers
 
             return ListaProizvoda;
         }
+
+        private decimal VrednostRacuna(StavkaRacuna stavka)
+        {
+            decimal ukupno = 0;
+            IQueryable<StavkaRacuna> stavke = _db.StavkeRacuna.Where(z => z.RacunId == stavka.RacunId);
+
+            if (stavke.Count() > 0)
+                ukupno = stavke.Sum(x => x.Kolicina * _db.Proizvodi.Where(a=>a.ID == x.ProizvodId).FirstOrDefault().Cena);
+            ukupno += stavka.Kolicina * _db.Proizvodi.Find(stavka.ProizvodId).Cena;
+            return ukupno;
+        }
+        private decimal VrednostRacuna(int racunId)
+        {
+            decimal ukupno = 0;
+            IQueryable<StavkaRacuna> stavke = _db.StavkeRacuna.Where(z => z.RacunId == racunId);
+            if (stavke.Count() > 0)
+                ukupno = stavke.Sum(x => x.Kolicina * _db.Proizvodi.Where(a => a.ID == x.ProizvodId).FirstOrDefault().Cena);
+            return ukupno;
+        }
+
     }
 }

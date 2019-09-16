@@ -2,12 +2,13 @@
 
 @{
     ViewBag.Title = "Račun";
+    string.Format("{0:#,##0.##}", Model);
 }
 
 <h2>@ViewBag.Title</h2>
 
 <p>
-    @Html.ActionLink("Kreirajte novi račun", "Create")
+    @Html.ActionLink("Kreirajte novi", "Create")
 </p>
 <table class="table">
     <tr>
@@ -36,9 +37,8 @@
         </td>
         <td>
             @Html.ActionLink("Izmeni", "Edit", new { id=item.ID }) |
-            @Html.ActionLink("Detalji", "Details", new { id=item.ID }) 
-@*|*@
-            @*@Html.ActionLink("Delete", "Delete", new { id=item.ID })*@
+            @Html.ActionLink("Detalji", "Details", new { id=item.ID }) |
+            @Html.ActionLink("Brisanje", "Delete", new { id=item.ID }) 
         </td>
     </tr>
 }

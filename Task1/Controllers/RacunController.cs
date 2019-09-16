@@ -11,46 +11,24 @@ namespace Task1.Controllers
     {
         DataDb _db = new DataDb();
 
-        public ActionResult Autocomplete(string term)
+        //[OutputCache(CacheProfile="Long", VaryByHeader="X-Request-With", Location=System.Web.UI.OutputCacheLocation.Server)]
+        public ActionResult Index()
         {
-            var model = _db.Racuni.OrderBy(x => x.BrojRacuna)
-                .Where(x => x.BrojRacuna.StartsWith(term))
-                .Take(10)
-                .Select(r => new
-                {
-                    label = r.BrojRacuna
-                });
-            return Json(model, JsonRequestBehavior.AllowGet);
-        }
-
-        // GET: Racun
-        public ActionResult Index(string searchTerm = null, int page = 1)
-        {
-            var model = _db.Racuni.OrderBy(x => x.BrojRacuna)
-                .Where(x => searchTerm == null || x.BrojRacuna.StartsWith(searchTerm))
-                .ToPagedList(page, 10);
-            if (Request.IsAjaxRequest())
-            {
-                return PartialView("_Racuni", model);
-            }
+            var model = _db.Racuni.OrderBy(x => x.BrojRacuna).ToList();
             return View(model);
         }
 
-        // GET: Racun/Details/5
         public ActionResult Details(int id)
         {
             return RedirectToAction("Index", "StavkaRacuna", new { racunId = id });
         }
 
-        // GET: Racun/Create
         public ActionResult Create()
         {
-            //Racun racun = PripremiNoviRacun();
-            //return View(racun);
-            return RedirectToAction("Create", "StavkaRacuna", new { racunId = 0 });
+            Racun racun = PripremiNoviRacun();
+            return View(racun);
         }
 
-        // POST: Racun/Create
         [HttpPost]
         public ActionResult Create(Racun Racuni)
         {
@@ -71,7 +49,6 @@ namespace Task1.Controllers
             }
         }
 
-        // GET: Racun/Edit/5
         [HttpGet]
         public ActionResult Edit(int? Id)
         {
@@ -86,7 +63,6 @@ namespace Task1.Controllers
             }
         }
 
-        // POST: Racun/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Edit(Racun racun)
@@ -107,7 +83,6 @@ namespace Task1.Controllers
             }
         }
 
-        // GET: Racun/Delete/5
         public ActionResult Delete(int id)
         {
             var racun = _db.Racuni.Where(x => x.ID == id).FirstOrDefault();
@@ -116,23 +91,7 @@ namespace Task1.Controllers
                 _db.StavkeRacuna.Remove(stavka);
             _db.Racuni.Remove(racun);
             _db.SaveChanges();
-            return RedirectToAction("Index");
-        }
-
-        // POST: Racun/Delete/5
-        [HttpPost]
-        public ActionResult Delete(int id, FormCollection collection)
-        {
-            try
-            {
-                // TODO: Add delete logic here
-
-                return RedirectToAction("Index");
-            }
-            catch
-            {
-                return View();
-            }
+            return RedirectToAction("Index", "Racun");
         }
 
         protected override void Dispose(bool disposing)
@@ -155,15 +114,5 @@ namespace Task1.Controllers
             else
                 return new Racun { BrojRacuna = brojRacuna, Datum = DateTime.Now, Ukupno = racun.Ukupno };
         }
-
-        //private Racun PripremiNoviRacun()
-        //{
-        //    int id = 0;
-        //    if (_db.Racuni.Count() > 0)
-        //        id = _db.Racuni.Max(x => x.ID);
-        //    string brojRacuna = String.Format("{0}-{1}", id + 1, DateTime.Now.Year);
-        //    return new Racun { BrojRacuna = brojRacuna, Datum = DateTime.Now, Ukupno = 0 };
-        //}
-
     }
 }
